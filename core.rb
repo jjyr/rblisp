@@ -1,7 +1,9 @@
 require 'pry'
 require 'pry-nav'
 
-Env = Class.new do
+class Env
+  @@local_variables = {}
+
   [:+, :-, :*, :/].each do |op|
     define_method(op){|*args|args.reduce op}
   end
@@ -10,8 +12,27 @@ Env = Class.new do
     args
   end
 
-  def define *args
+  def [] key
+    @@local_variables[key]
   end
+
+  def []= key, value
+    @@local_variables[key] = value
+  end
+
+  def local_variables? key
+    @@local_variables.has_key? key
+  end
+end
+
+Env.freeze
+
+def new_env_class
+  Env.dup
+end
+
+def new_env
+  new_env_class.new
 end
 
 class Array
@@ -44,18 +65,23 @@ def parse str
   parse_token str, Env.new
 end
 
-def evaluate arr, env = Env.new
-  return arr unless arr.is_a? Array
-  p arr
+def evaluate arr, env = new_env
+  arr = arr.first if arr.is_a?(Array) && arr.size == 1 && !env.respond_to?(arr.first.to_s)
+  if !arr.is_a?(Array)
+    return env.local_variables?(arr) ? env[arr] : arr
+  end
   case arr.first.to_s
   when 'define'
-    p arr
+    env[arr[1]] = evaluate(arr[2..-1])
+    return
   end
 
   arr.map! do |token|
     case token
     when Array
-      evaluate token
+      evaluate token, Class.new(env)
+    when Symbol
+      env.local_variables?(token) ? env[token] : token
     else
       token
     end
@@ -63,11 +89,11 @@ def evaluate arr, env = Env.new
   env.send *arr
 end
 
-def run str, env = Env.new
+def run str, env = new_env
   evaluate parse(str), env
 end
 
-env = Env.new
+env = new_env
 
 loop do
   p run(gets.chomp, env)
