@@ -38,7 +38,7 @@ end
 class Array
   alias _inspect inspect
   def inspect
-    "(#{_inspect[1..-2]})"
+    "(#{join ' '})"
   end
 end
 
@@ -70,10 +70,14 @@ def evaluate arr, env = new_env
   if !arr.is_a?(Array)
     return env.local_variables?(arr) ? env[arr] : arr
   end
-  case arr.first.to_s
-  when 'define'
+  case arr.first
+  when :define
     env[arr[1]] = evaluate(arr[2..-1])
     return
+  when Symbol
+    #nothing
+  else
+    arr.unshift :list
   end
 
   arr.map! do |token|
