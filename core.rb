@@ -79,7 +79,7 @@ def evaluate arr, env = new_env
   arr.map! do |token|
     case token
     when Array
-      evaluate token, Class.new(env)
+      evaluate token, Class.new(env.class).new
     when Symbol
       env.local_variables?(token) ? env[token] : token
     else
