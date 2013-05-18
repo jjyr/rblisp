@@ -52,7 +52,7 @@ def parse_token str, vals = [], env
     when ' ', ')'
       vals << (val =~ /\d+|\A".+"\z/ ? eval(val) : val.to_sym) unless val.empty?
       val = ""
-      return vals.size == 1 ? vals.first : vals if head == ')'
+      return vals if head == ')'
     else
       val << head
     end
