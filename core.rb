@@ -23,6 +23,10 @@ class Env
   def local_variables? key
     @@local_variables.has_key? key
   end
+
+  def quote token
+    token
+  end
 end
 
 Env.freeze
