@@ -39,7 +39,7 @@ class Array
   alias _inspect inspect
   alias to_s _inspect
   def inspect
-    "(#{join ' '})"
+    "(#{map(&:inspect).join ' '})"
   end
 end
 
@@ -85,10 +85,10 @@ def evaluate arr, env = new_env
     return
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
-  when Symbol
-    #nothing
   else
-    arr.unshift :list
+    unless arr.first.is_a?(Symbol) && env.respond_to?(arr.first)
+      arr.unshift :list
+    end
   end
 
   arr.map! do |token|
