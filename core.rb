@@ -47,6 +47,10 @@ class Env
   def cons h, list
     list.unshift h
   end
+
+  def new_stack
+    Class.new(self.class).new
+  end
 end
 
 Env.freeze
@@ -118,46 +122,69 @@ def is_literal? token, env = new_env
   token.is_a?(String) || token.is_a?(Numeric) || token.is_a?(Symbol) && !env.respond_to?(token, true)
 end
 
+def instruction_dump expr
+  "[#{expr.map(&:to_token).join ","}]"
+end
+
 def evaluate arr, env = new_env
-  #binding.pry
   if arr.is_a?(Array) && arr.size == 1 #&& !env.respond_to?(arr.first.to_s, true)
     arr = arr.first 
     if !arr.is_a?(Array)
-      return env.local_variables?(arr) ? env[arr] : arr
+      if arr.respond_to? :call
+        return env.instance_eval do
+          arr.call
+        end
+      else
+        return env.local_variables?(arr) ? env[arr] : arr
+      end
     else
-      return evaluate arr, Class.new(env.class).new
+      return evaluate arr, env.new_stack
     end
   end
   case arr.first
   when :define
     if arr[1].is_a? Array
-      p env
-      p arr[1]
-
       env.class.class_eval %Q{ 
         def #{arr[1].shift} #{arr[1].join ", "}
-          #{arr[2..-1].map{|expr| "evaluate([#{expr.map(&:to_token).join ","}])"}.join ";"}
+        #{arr[2..-1].map{|expr| "evaluate(#{instruction_dump expr})"}.join ";"}
         end
       }
     else
-      #binding.pry
-      env[arr[1]] = evaluate(arr[2..-1])
+      env[arr[1]] = evaluate(arr[2..-1], env)
     end
     return
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
+  when :cond
+    case arr[1]
+    when Array
+      condition, tokens = arr[1]
+      return evaluate([env.instance_eval("->(){
+      if [true, :'#t'].include? evaluate(#{instruction_dump condition})
+        evaluate(#{instruction_dump tokens})
+      else
+        evaluate(#{arr.delete_at(1);instruction_dump arr})
+      end
+      }")], env.new_stack)
+      return evaluate(arr[2..-1])
+    when nil
+      return
+    else 
+      raise "parse error"
+    end
   end
 
   arr.map! do |token|
     case token
     when Array
-      evaluate token, Class.new(env.class).new
+      evaluate token, env.new_stack
     when Symbol
       env.local_variables?(token) ? env[token] : token
     else
       token
     end
   end
+
 
   if arr.first.respond_to? :call
     env.instance_eval do
@@ -166,7 +193,7 @@ def evaluate arr, env = new_env
   else
     if is_literal? arr.first
       arr.unshift :list
-      evaluate arr, Class.new(env.class).new
+      evaluate arr, env.new_stack
     else
       env.send *arr
     end
