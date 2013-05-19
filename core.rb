@@ -41,9 +41,29 @@ class Array
   def inspect
     "(#{map(&:inspect).join ' '})"
   end
+
+  def to_token
+    token = "["
+    each do |t|
+      token << "#{t.to_token},"
+    end
+    token[-1] = "]"
+    token
+  end
+end
+
+class String
+  alias to_token inspect
+end
+
+class Numeric
+  alias to_token to_s
 end
 
 class Symbol
+  def to_token
+    ":#{self}"
+  end
   alias inspect to_s
 end
 
@@ -55,7 +75,7 @@ def parse_token str, vals = [], env
     when '('
       vals << parse_token(str, env)
     when ' ', ')'
-      vals << (val =~ /\d+|\A".+"\z/ ? eval(val) : val.to_sym) unless val.empty?
+      vals << (val =~ /\d+|\A["|'].+["|']\z/ ? eval(val) : val.to_sym) unless val.empty?
       val = ""
       return vals if head == ')'
     else
@@ -71,6 +91,7 @@ def parse str
 end
 
 def evaluate arr, env = new_env
+  #binding.pry
   if arr.is_a?(Array) && arr.size == 1 #&& !env.respond_to?(arr.first.to_s, true)
     arr = arr.first 
     if !arr.is_a?(Array)
@@ -80,12 +101,16 @@ def evaluate arr, env = new_env
   case arr.first
   when :define
     if arr[1].is_a? Array
+      p env
+      p arr[1]
+
       env.class.class_eval %Q{ 
         def #{arr[1].shift} #{arr[1].join ", "}
-          #{arr[2..-1].map{|expr| "evaluate([:#{expr.join ","}])"}.join ";"}
+          #{arr[2..-1].map{|expr| "evaluate([#{expr.map(&:to_token).join ","}])"}.join ";"}
         end
       }
     else
+      #binding.pry
       env[arr[1]] = evaluate(arr[2..-1])
     end
     return
