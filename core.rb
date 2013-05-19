@@ -146,12 +146,6 @@ def evaluate arr, env = new_env
     return
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
-  else
-=begin
-  binding.pry
-    if !(arr.first.is_a?(Symbol) && env.respond_to?(arr.first, true)) && !arr.first.respond_to?(:call)
-      arr.unshift :list
-=end
   end
 
   arr.map! do |token|
