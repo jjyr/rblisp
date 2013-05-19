@@ -118,6 +118,17 @@ def parse str
   parse_token str, Env.new
 end
 
+def boolean? token
+  case token
+  when true, :"#t"
+    true
+  when false, :"#f"
+    false
+  else
+    raise "#{token} is not boolean!"
+  end
+end
+
 def is_literal? token, env = new_env
   token.is_a?(String) || token.is_a?(Numeric) || token.is_a?(Symbol) && !env.respond_to?(token, true)
 end
@@ -160,7 +171,7 @@ def evaluate arr, env = new_env
     when Array
       condition, tokens = arr[1]
       return evaluate([env.instance_eval("->(){
-      if [true, :'#t'].include? evaluate(#{instruction_dump condition})
+      if boolean? evaluate(#{instruction_dump condition})
         evaluate(#{instruction_dump tokens})
       else
         evaluate(#{arr.delete_at(1);instruction_dump arr})
