@@ -37,6 +37,7 @@ end
 
 class Array
   alias _inspect inspect
+  alias to_s _inspect
   def inspect
     "(#{join ' '})"
   end
@@ -74,6 +75,8 @@ def evaluate arr, env = new_env
   when :define
     env[arr[1]] = evaluate(arr[2..-1])
     return
+  when :lambda
+    return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
   when Symbol
     #nothing
   else
@@ -90,7 +93,14 @@ def evaluate arr, env = new_env
       token
     end
   end
-  env.send *arr
+
+  if arr.first.respond_to? :call
+    env.instance_eval do
+      arr.first.call *arr[1..-1]
+    end
+  else
+    env.send *arr
+  end
 end
 
 def run str, env = new_env
