@@ -73,7 +73,15 @@ def evaluate arr, env = new_env
   end
   case arr.first
   when :define
-    env[arr[1]] = evaluate(arr[2..-1])
+    if arr[1].is_a? Array
+      env.class.class_eval %Q{ 
+        def #{arr[1].shift} #{arr[1].join ", "}
+          evaluate([:#{arr[2].join ","}])
+        end
+      }
+    else
+      env[arr[1]] = evaluate(arr[2..-1])
+    end
     return
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
