@@ -27,6 +27,22 @@ class Env
   def quote token
     token
   end
+
+  def atom atom
+    atom.is_a? Symbol
+  end
+
+  def eq elem1, elem2
+    elem1 == elem2
+  end
+  
+  def car x
+    x.first
+  end
+
+  def cdr x
+    x.last
+  end
 end
 
 Env.freeze
