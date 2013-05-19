@@ -43,6 +43,10 @@ class Array
   end
 end
 
+class Symbol
+  alias inspect to_s
+end
+
 def parse_token str, vals = [], env
   val = ""
   loop do
