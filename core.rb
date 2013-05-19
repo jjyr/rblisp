@@ -41,7 +41,11 @@ class Env
   end
 
   def cdr x
-    x.last
+    x[1..-1]
+  end
+
+  def cons h, list
+    list.unshift h
   end
 end
 
@@ -110,7 +114,12 @@ def parse str
   parse_token str, Env.new
 end
 
+def is_literal? token, env = new_env
+  token.is_a?(String) || token.is_a?(Numeric) || token.is_a?(Symbol) && !env.respond_to?(token, true)
+end
+
 def evaluate arr, env = new_env
+  #binding.pry
   if arr.is_a?(Array) && arr.size == 1 #&& !env.respond_to?(arr.first.to_s, true)
     arr = arr.first 
     if !arr.is_a?(Array)
@@ -138,9 +147,11 @@ def evaluate arr, env = new_env
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
   else
-    unless arr.first.is_a?(Symbol) && env.respond_to?(arr.first, true) || !arr.first.respond_to?(:call)
+=begin
+  binding.pry
+    if !(arr.first.is_a?(Symbol) && env.respond_to?(arr.first, true)) && !arr.first.respond_to?(:call)
       arr.unshift :list
-    end
+=end
   end
 
   arr.map! do |token|
@@ -159,7 +170,12 @@ def evaluate arr, env = new_env
       arr.first.call *arr[1..-1]
     end
   else
-    env.send *arr
+    if is_literal? arr.first
+      arr.unshift :list
+      evaluate arr, Class.new(env.class).new
+    else
+      env.send *arr
+    end
   end
 end
 
