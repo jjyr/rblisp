@@ -53,6 +53,22 @@ class Env
   def new_stack
     self.class.new self
   end
+
+  def < x1, x2
+    x1 < x2
+  end
+
+  def > x1, x2
+    x1 > x2
+  end
+
+  def <= x1, x2
+    !send(:>,[x1, x2])
+  end
+
+  def >= x1, x2
+    !send(:<,[x1, x2])
+  end
 end
 
 def new_env_class
@@ -84,7 +100,15 @@ class String
   alias to_token inspect
 end
 
-class Numeric
+class Fixnum
+  alias to_token to_s
+end
+
+class Bignum
+  alias to_token to_s
+end
+
+class Float
   alias to_token to_s
 end
 
@@ -138,8 +162,6 @@ def instruction_dump expr
 end
 
 def evaluate token, env = new_env
-  #binding.pry
-  p token
   case token
   when Array
     arr = token
@@ -148,9 +170,6 @@ def evaluate token, env = new_env
   when Symbol
     return env.local_variables?(token) ? env[token] : token
   end
-  p "arr"
-  p arr
-
   case arr.first
   when :define
     if arr[1].is_a? Array
@@ -160,7 +179,6 @@ def evaluate token, env = new_env
         end
       }
     else
-      #binding.pry
       env[arr[1]] = evaluate(arr[2], env)
     end
     return
@@ -185,6 +203,7 @@ def evaluate token, env = new_env
     end
   when Array
     arr.unshift :list if arr.size == 1 && arr.first.is_a?(Array)
+    arr[0] = evaluate arr.first, env.new_stack
     evaluate arr, env.new_stack
   else
     token = arr.first
@@ -195,8 +214,13 @@ def evaluate token, env = new_env
         token.call *arr[1..-1].map{|elem| evaluate elem, env.new_stack}
       end
     else
-      arr.unshift :list
-      evaluate arr, env
+      unless token.is_a?(Symbol) && env.local_variables?(token)
+        arr.unshift :list 
+        evaluate arr, env
+      else
+        arr[0] = evaluate arr.first, env.new_stack
+        evaluate arr, env.new_stack
+      end
     end
   end
 end
