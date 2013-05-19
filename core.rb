@@ -71,16 +71,18 @@ def parse str
 end
 
 def evaluate arr, env = new_env
-  arr = arr.first if arr.is_a?(Array) && arr.size == 1 && !env.respond_to?(arr.first.to_s, true)
-  if !arr.is_a?(Array)
-    return env.local_variables?(arr) ? env[arr] : arr
+  if arr.is_a?(Array) && arr.size == 1 #&& !env.respond_to?(arr.first.to_s, true)
+    arr = arr.first 
+    if !arr.is_a?(Array)
+      return env.local_variables?(arr) ? env[arr] : arr
+    end
   end
   case arr.first
   when :define
     if arr[1].is_a? Array
       env.class.class_eval %Q{ 
         def #{arr[1].shift} #{arr[1].join ", "}
-          evaluate([:#{arr[2].join ","}])
+          #{arr[2..-1].map{|expr| "evaluate([:#{expr.join ","}])"}.join ";"}
         end
       }
     else
