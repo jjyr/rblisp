@@ -4,7 +4,7 @@ rblisp
 lisp-like interpreter in ruby, just for study.
 
 ######Notice
-processing, not complete now
+processing, some test not pass now
 
 if you like
 fork & feel free to send pull request
@@ -16,6 +16,6 @@ fork & feel free to send pull request
 4. small.
 
 ######Support
-lisp methods: define, lambda, list
+lisp methods: define, lambda, list, eq, quote + / * -, cond etc...
 
-ruby Kernel methods: puts, exit, etc.
+ruby Kernel methods: puts, exit, etc...
