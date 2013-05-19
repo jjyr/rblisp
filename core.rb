@@ -91,11 +91,12 @@ def parse str
 end
 
 def evaluate arr, env = new_env
-  #binding.pry
   if arr.is_a?(Array) && arr.size == 1 #&& !env.respond_to?(arr.first.to_s, true)
     arr = arr.first 
     if !arr.is_a?(Array)
       return env.local_variables?(arr) ? env[arr] : arr
+    else
+      return evaluate arr, Class.new(env.class).new
     end
   end
   case arr.first
@@ -117,7 +118,7 @@ def evaluate arr, env = new_env
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
   else
-    unless arr.first.is_a?(Symbol) && env.respond_to?(arr.first, true)
+    unless arr.first.is_a?(Symbol) && env.respond_to?(arr.first, true) || !arr.first.respond_to?(:call)
       arr.unshift :list
     end
   end
