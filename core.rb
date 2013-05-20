@@ -30,6 +30,10 @@ class Env
     token
   end
 
+  def size list
+    list.size
+  end
+
   def atom atom
     atom.is_a? Symbol
   end
@@ -125,16 +129,34 @@ end
 
 def parse_token str, vals = []
   val = ""
+  is_str = false
+  str_char = nil
+  handle_str_limit = ->(char){
+    if ["'", '"'].include? char
+      if is_str
+        is_str = !(char == str_char)
+      else
+        str_char = char
+        is_str = true
+      end
+    end
+  }
   loop do
     head = str.shift
     case head
     when '('
       vals << parse_token(str)
     when ' ', ')'
-      vals << (val =~ /\d+|\A["|'].+["|']\z/ ? eval(val) : val.to_sym) unless val.empty?
-      val = ""
-      return vals if head == ')'
+      if is_str
+        handle_str_limit[head]
+        val << head
+      else
+        vals << (val =~ /\d+|\A["|'].+["|']\z/ ? eval(val) : val.to_sym) unless val.empty?
+        val = ""
+        return vals if head == ')'
+      end
     else
+      handle_str_limit[head]
       val << head
     end
   end
