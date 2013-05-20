@@ -1,6 +1,3 @@
-require 'pry'
-require 'pry-nav'
-
 class Env
   def initialize sup = nil
     @local_variables = sup ? sup.instance_variable_get("@local_variables").dup : {}
