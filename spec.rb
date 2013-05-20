@@ -5,7 +5,7 @@ require 'rspec'
 require_relative 'core'
 
 describe "rblist" do
-  it "shoud parse and run"do
+  it "shoud parse and run" do
     run("(+ 2 2)").should == 4
     run("(+ (* 2 100) (* 1 10))").should == 210
     run("(define x 3)").should == nil
@@ -22,6 +22,10 @@ describe "rblist" do
     e = new_env
     run("(define twice (lambda (x) (* 2 x)))", e).should == nil
     run("(twice 5)", e).should == 10
+    e = new_env
+    run("(define fact (lambda (n) (cond ((<= n 1) 1) (true (* n (fact (- n 1)))))))", e).should == nil
+    run("(fact 3)", e).should == 6
+    run("(fact 50)", e).should == 30414093201713378043612608166064768844377641568960512000000000000
     e = new_env
     run("(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))", e).should == nil
     run("(fact 3)", e).should == 6

@@ -63,11 +63,11 @@ class Env
   end
 
   def <= x1, x2
-    !send(:>,[x1, x2])
+    !send(:>, x1, x2)
   end
 
   def >= x1, x2
-    !send(:<,[x1, x2])
+    !send(:<, x1, x2)
   end
 end
 
@@ -94,6 +94,10 @@ class Array
     token[-1] = "]"
     token
   end
+end
+
+[TrueClass, FalseClass, NilClass].each do |klass|
+  klass.class_eval "def to_token; self; end"
 end
 
 class String
@@ -160,18 +164,22 @@ def is_literal? token, env = new_env
 end
 
 def instruction_dump expr
-  "[#{expr.map(&:to_token).join ","}]"
+  if expr.respond_to? :map
+    "[#{expr.map(&:to_token).join ","}]"
+  else
+    expr
+  end
 end
 
-def eval_str tokens
-  "evaluate(#{instruction_dump tokens})"
+def eval_str tokens, env = 'env'
+  "evaluate(#{instruction_dump tokens}#{env.nil? ? "" : ", #{env}"})"
 end
 
 def evaluate token, env = new_env
   case token
   when Array
     arr = token
-  when Numeric, String
+  when Numeric, String, TrueClass, FalseClass, NilClass
     return token
   when Symbol
     return env.local_variables?(token) ? env[token] : token
@@ -189,19 +197,24 @@ def evaluate token, env = new_env
     end
     return
   when :lambda
-    return env.instance_eval "->(#{arr[1].join ","}){#{eval_str arr[2]}}"
+    return env.instance_eval "->(#{arr[1].join ","}){
+    #{arr[1].map{|argm| "env[:#{argm}] = #{argm.to_s}"}.join ";"}
+    #{eval_str arr[2], "env"}
+    }"
+  when :if
+    _if, cond, t_tokens, el_token = arr
+    evaluate [:cond, [cond, t_tokens], [true, el_token]], env.new_stack
   when :cond
     case arr[1]
     when Array
       condition, tokens = arr[1]
       return evaluate([env.instance_eval("->(){
       if boolean? #{eval_str condition}
-        #{eval_str tokens}
+      #{eval_str tokens}
       else
-        #{arr.delete_at(1);eval_str arr}
+      #{arr.delete_at(1);eval_str arr}
       end
       }")], env.new_stack)
-      return evaluate(arr[2..-1])
     when nil
       return
     else 
