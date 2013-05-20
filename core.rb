@@ -140,6 +140,8 @@ def parse str
   str << ")"
   str = str.each_char.to_a
   parse_token str
+rescue StandardError => e
+  raise "parse error: #{e.message}"
 end
 
 def boolean? token
@@ -161,6 +163,10 @@ def instruction_dump expr
   "[#{expr.map(&:to_token).join ","}]"
 end
 
+def eval_str tokens
+  "evaluate(#{instruction_dump tokens})"
+end
+
 def evaluate token, env = new_env
   case token
   when Array
@@ -175,7 +181,7 @@ def evaluate token, env = new_env
     if arr[1].is_a? Array
       env.class.class_eval %Q{ 
         def #{arr[1].shift} #{arr[1].join ", "}
-        #{arr[2..-1].map{|expr| "evaluate(#{instruction_dump expr})"}.join ";"}
+        #{arr[2..-1].map{|expr| eval_str expr}.join ";"}
         end
       }
     else
@@ -183,16 +189,16 @@ def evaluate token, env = new_env
     end
     return
   when :lambda
-    return env.instance_eval "->(#{arr[1].join ","}){evaluate([:#{arr[2].join ","}])}"
+    return env.instance_eval "->(#{arr[1].join ","}){#{eval_str arr[2]}}"
   when :cond
     case arr[1]
     when Array
       condition, tokens = arr[1]
       return evaluate([env.instance_eval("->(){
-      if boolean? evaluate(#{instruction_dump condition})
-        evaluate(#{instruction_dump tokens})
+      if boolean? #{eval_str condition}
+        #{eval_str tokens}
       else
-        evaluate(#{arr.delete_at(1);instruction_dump arr})
+        #{arr.delete_at(1);eval_str arr}
       end
       }")], env.new_stack)
       return evaluate(arr[2..-1])
