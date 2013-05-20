@@ -1,10 +1,10 @@
 rblisp
 ======
 
-lisp-like interpreter in ruby, just for fun.
+lisp-like interpreter in ruby, just for study.
 
 ######NOTE
-1. just for fun.
+1. just for study.
 2. all methods / evaluate / local\_variables delegate to ruby.
 3. easy to learn.
 
@@ -23,8 +23,12 @@ lisp-like interpreter in ruby, just for fun.
 (exit)
 ```
 
+or
+
+`ruby rblisp.rb test.lisp` to run file
+
 ######Support
-lisp methods: define, lambda, list, eq, quote + / * -, cond, if etc...
+lisp methods: define, lambda, list, eq, quote + / * -, cond, if, size, >, <, >=, <= etc...
 
 ruby Kernel methods: puts, exit, etc...
 
