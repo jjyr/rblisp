@@ -150,9 +150,9 @@ end
 
 def boolean? token
   case token
-  when true, :"#t"
+  when true, :"#t", :true
     true
-  when false, :"#f"
+  when false, :"#f", :false
     false
   else
     raise "#{token} is not boolean!"
@@ -167,7 +167,7 @@ def instruction_dump expr
   if expr.respond_to? :map
     "[#{expr.map(&:to_token).join ","}]"
   else
-    expr
+    expr.to_token
   end
 end
 
@@ -182,7 +182,7 @@ def evaluate token, env = new_env
   when Numeric, String, TrueClass, FalseClass, NilClass
     return token
   when Symbol
-    return env.local_variables?(token) ? env[token] : token
+    return (if env.local_variables?(token) then env[token] elsif env.respond_to?(token, true) then env.method(token) else token end)
   end
   case arr.first
   when :define
@@ -226,14 +226,12 @@ def evaluate token, env = new_env
     evaluate arr, env.new_stack
   else
     token = arr.first
-    if token.is_a?(Symbol) && env.respond_to?(token, true)
-      env.send arr.first, *arr[1..-1].map{|elem| evaluate elem, env.new_stack}
-    elsif token.respond_to? :call
+    if token.respond_to? :call
       env.instance_eval do
         token.call *arr[1..-1].map{|elem| evaluate elem, env.new_stack}
       end
     else
-      unless token.is_a?(Symbol) && env.local_variables?(token)
+      unless token.is_a?(Symbol) && (env.respond_to?(token, true) || env.local_variables?(token))
         arr.unshift :list 
         evaluate arr, env
       else
