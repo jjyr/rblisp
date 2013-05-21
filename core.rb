@@ -19,14 +19,14 @@ class Env
     head, *tail = args
     return true if head == nil || head == []
     head = head.first while head.is_a?(Array) && head.size == 1
-    boolean?(head) && send(:and, tail)
+    boolean?(head) && send(:and, *tail)
   end
 
   def or *args
     head, *tail = args
     return false if head == nil || head == []
     head = head.first while head.is_a?(Array) && head.size == 1
-    boolean?(head) || send(:and, tail)
+    boolean?(head) || send(:or, *tail)
   end
 
   def not arg
