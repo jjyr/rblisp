@@ -22,6 +22,11 @@ describe "rblist" do
     run("(1 2 5 (+ 3 5))").should == [1,2,5,8]
     run("(cond ((atom 6) (+ 2 3)) ((atom (car (b 5 9))) (+ 2 2)))").should == 4
     run("((lambda (x) (+ x x)) 5)").should == 10
+    run("(and (atom x) false)").should == false
+    run("(or (atom x) false)").should == true
+    run("(not (and (and true true) (or (and true false) true)))").should == false
+    run("(map (lambda (x) (* 2 x)) (2 5 4 6))").should == [4, 10, 8, 12]
+    run("(string (map (lambda (x) (* 2 x)) (2 5 4 6)))").should == "410812"
     e = new_env
     run("(define twice (lambda (x) (* 2 x)))", e).should == nil
     run("(twice 5)", e).should == 10
