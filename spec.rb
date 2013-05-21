@@ -25,6 +25,8 @@ describe "rblist" do
     run("(and (atom x) false)").should == false
     run("(or (atom x) false)").should == true
     run("(not (and (and true true) (or (and true false) true)))").should == false
+    run("(and true true true false true)").should == false
+    run("(or false false true false true)").should == true
     run("(map (lambda (x) (* 2 x)) (2 5 4 6))").should == [4, 10, 8, 12]
     run("(string (map (lambda (x) (* 2 x)) (2 5 4 6)))").should == "410812"
     e = new_env
