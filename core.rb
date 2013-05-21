@@ -11,6 +11,32 @@ class Env
     args
   end
 
+  def map *args
+    args.last.map{|e| args[-2].call e}
+  end
+
+  def and *args
+    head, *tail = args
+    return true if head == nil || head == []
+    head = head.first while head.is_a?(Array) && head.size == 1
+    boolean?(head) && send(:and, tail)
+  end
+
+  def or *args
+    head, *tail = args
+    return false if head == nil || head == []
+    head = head.first while head.is_a?(Array) && head.size == 1
+    boolean?(head) || send(:and, tail)
+  end
+
+  def not arg
+    !boolean?(arg)
+  end
+
+  def string *args
+    args.join
+  end
+
   def [] key
     @local_variables[key]
   end
