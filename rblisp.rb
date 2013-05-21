@@ -20,7 +20,9 @@ loop do
   print "rblisp :#{line} > " unless ARGV.size > 0
   count = 0
   str = ""
+  last_char = ""
   while char = getc
+    last_char = char
     if char == '('
       count += 1
     elsif char == ')'
@@ -31,7 +33,7 @@ loop do
       exit
     end
     str << char
-    if count == 0
+    if count == 0 && last_char == $/
       str.strip!
       next if str.empty?
       p run(str, env) 
