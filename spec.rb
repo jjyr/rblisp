@@ -13,9 +13,12 @@ describe "rblist" do
     run("(+ (* 2 100) (* 1 10))").should == 210
     run("(define x 3)").should == nil
     run("x").should == :x
+    run("exit").class.should == Method
+    run("(puts nil)").should == nil
     e = new_env
     run("(define x 5)", e).should == nil
     run("(x 5 6 7)", e).should == [5,5,6,7]
+    run("(x 5 6 7)", e).should == run("(list x 5 6 7)", e)
     run("x", e).should == 5
     run("(quote 'a')").should == 'a'
     run("(quote a)").should == :a
