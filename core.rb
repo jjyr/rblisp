@@ -3,6 +3,10 @@ class Env
     @local_variables = sup ? sup.instance_variable_get("@local_variables").dup : {}
   end
 
+  def env
+    self
+  end
+
   [:+, :-, :*, :/].each do |op|
     define_method(op){|*args|args.reduce op}
   end
@@ -234,7 +238,8 @@ def evaluate token, env = new_env
     if arr[1].is_a? Array
       env.class.class_eval %Q{ 
         def #{arr[1].shift} #{arr[1].join ", "}
-        #{arr[2..-1].map{|expr| eval_str expr}.join ";"}
+        #{arr[1].map{|argm| "env[:#{argm}] = #{argm.to_s}"}.join ";"}
+        #{eval_str arr[2], "env"}
         end
       }
     else
