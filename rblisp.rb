@@ -16,6 +16,7 @@ rescue EOFError
 end
 
 loop do
+  begin
   line += 1
   print "rblisp :#{line} > " unless ARGV.size > 0
   count = 0
@@ -39,5 +40,10 @@ loop do
       p run(str, env) 
       break
     end
+  end
+  rescue StandardError => e
+    puts e.class
+    puts caller
+    puts e
   end
 end
