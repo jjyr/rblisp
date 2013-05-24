@@ -69,16 +69,24 @@ class Env
     elem1 == elem2
   end
   
-  def car x
+  def head x
     x.first
   end
 
-  def cdr x
+  def tail x
     x[1..-1]
   end
 
-  def cons h, list
-    list.unshift h
+  def cons f, s
+    {f: f, s: s}
+  end
+
+  def car item
+    item[:f]
+  end
+
+  def cdr item
+    item[:s]
   end
 
   def new_stack
