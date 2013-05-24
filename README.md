@@ -1,12 +1,12 @@
 rblisp
 ======
 
-lisp-like interpreter in ruby.
+lisp / scheme interpreter in ruby.
 
 ##NOTE
-1. For study, just enough.
+1. implements in ruby, use many ruby tricks.
 2. all methods / evaluate / local\_variables delegate to ruby.
-3. easy to learn.
+3. easy to understand.
 
 ##Usage
 
@@ -28,9 +28,11 @@ or
 `ruby rblisp.rb test.lisp` to run file
 
 ##Support Methods
-lisp methods: define, lambda, list, eq, map, quote + / * -, cond, if, and, or, not, size, >, <, >=, <= etc...
+lisp methods: 
+>let, define, lambda, list, eq, map, quote ` or ' , + / * -, cond, if, and, or, not, size, head, tail, car, cdr, cons, display, newline, >, <, >=, <= etc...
 
-ruby Kernel methods: puts, exit, etc...
+ruby Kernel methods:
+>puts, exit, etc...
 
 ##LICENSE
 Copyright (c) 2013 jjy
@@ -38,6 +40,4 @@ Copyright (c) 2013 jjy
 MIT License
 
 ##Contribute
-if you like
-
-fork & feel free to send pull request!
+fork & feel free to send pull requests!
