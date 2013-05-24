@@ -53,10 +53,6 @@ class Env
     @local_variables.has_key? key
   end
 
-  def quote token
-    token
-  end
-
   def size list
     list.size
   end
@@ -166,32 +162,27 @@ def parse_token str, vals = []
   val = ""
   is_str = false
   str_char = nil
-  handle_str_limit = ->(char){
-    if ["'", '"'].include? char
-      if is_str
-        is_str = !(char == str_char)
-      else
-        str_char = char
-        is_str = true
-      end
-    end
-  }
   loop do
     head = str.shift
     case head
     when '('
-      vals << parse_token(str)
+      if val =~ /['`]/
+        vals << [:quote, parse_token(str)]
+        val = ""
+      else
+        vals << parse_token(str)
+      end
     when ' ', ')'
       if is_str
-        handle_str_limit[head]
+        is_str = !(head == '"')
         val << head
       else
-        vals << (val =~ /\A["'].+["']\z|\A[-+]?\d+\z|nil|#t|#f/ ? get_literal(val) : val.to_sym) unless val.empty?
+        vals << get_literal(val) unless val.empty?
         val = ""
         return vals if head == ')'
       end
     else
-      handle_str_limit[head]
+      is_str = !is_str if head == '"'
       val << head
     end
   end
@@ -217,13 +208,19 @@ def boolean? token
 end
 
 def get_literal token
-  case token
-  when "#t"
-    true
-  when "#f"
-    false
+  if token =~ /\A["'`].+"?\z|\A[-+]?\d+\z|nil|#t|#f/
+    case token
+    when "#t"
+      true
+    when "#f"
+      false
+    when /\A['`]/
+      [:quote, get_literal(token[1..-1])]
+    else
+      eval(token)
+    end
   else
-    eval(token)
+    token.to_sym
   end
 end
 
@@ -242,6 +239,7 @@ end
 def evaluate token, env = new_env
   case token
   when Array
+    raise "expression should not be blank" if token.empty?
     arr = token
   when Numeric, String, TrueClass, FalseClass, NilClass
     return token
