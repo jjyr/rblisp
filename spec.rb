@@ -24,7 +24,7 @@ describe "rblist" do
     run("(quote 'a')").should == 'a'
     run("(quote a)").should == :a
     run("(list 1 2 5 (+ 3 5))").should == [1,2,5,8]
-    run("(cond ((atom 6) (+ 2 3)) ((atom (car (b 5 9))) (+ 2 2)))").should == 4
+    run("(cond ((atom 6) (+ 2 3)) ((atom (car (list (quote b) 5 9))) (+ 2 2)))").should == 4
     run("((lambda (x) (+ x x)) 5)").should == 10
 
     e = new_env
@@ -46,12 +46,12 @@ describe "rblist" do
     run("(f *)", e).should == 8
 
     run("((lambda (x) (+ x x)) 5)").should == 10
-    run("(and (atom x) false)").should == false
-    run("(or (atom x) false)").should == true
-    run("(not (and (and true true) (or (and true false) true)))").should == false
-    run("(and true true true false true)").should == false
-    run("(or false false true false true)").should == true
-    run("(and true #t)").should == true
+    run("(and (atom (quote x)) #f)").should == false
+    run("(or (atom (quote x)) #f)").should == true
+    run("(not (and (and #t #t) (or (and #t #f) #t)))").should == false
+    run("(and #t #t #t #f #t)").should == false
+    run("(or #f #f #t #f #t)").should == true
+    run("(and #t #t)").should == true
     run("(and #f #t)").should == false
     run("(map (lambda (x) (* 2 x)) (list 2 5 4 6))").should == [4, 10, 8, 12]
     run("(string (map (lambda (x) (* 2 x)) (list 2 5 4 6)))").should == "410812"
@@ -61,7 +61,7 @@ describe "rblist" do
     run("(twice 5)", e).should == 10
 
     e = new_env
-    run("(define fact (lambda (n) (cond ((<= n 1) 1) (true (* n (fact (- n 1)))))))", e).should == nil
+    run("(define fact (lambda (n) (cond ((<= n 1) 1) (#t (* n (fact (- n 1)))))))", e).should == nil
     run("(fact 3)", e).should == 6
     run("(fact 50)", e).should == 30414093201713378043612608166064768844377641568960512000000000000
 
