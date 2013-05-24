@@ -178,7 +178,7 @@ def parse_token str, vals = []
         handle_str_limit[head]
         val << head
       else
-        vals << (val =~ /\d+|\A["|'].+["|']\z/ ? eval(val) : val.to_sym) unless val.empty?
+        vals << (val =~ /\A["'].+["']\z|\A\d+\z/ ? eval(val) : val.to_sym) unless val.empty?
         val = ""
         return vals if head == ')'
       end
