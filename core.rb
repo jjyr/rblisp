@@ -178,7 +178,7 @@ def parse_token str, vals = []
         handle_str_limit[head]
         val << head
       else
-        vals << (val =~ /\A["'].+["']\z|\A\d+\z/ ? eval(val) : val.to_sym) unless val.empty?
+        vals << (val =~ /\A["'].+["']\z|\A[-+]?\d+\z/ ? eval(val) : val.to_sym) unless val.empty?
         val = ""
         return vals if head == ')'
       end
@@ -239,7 +239,7 @@ def evaluate token, env = new_env
       env.class.class_eval %Q{ 
         def #{arr[1].shift} #{arr[1].join ", "}
         #{arr[1].map{|argm| "env[:#{argm}] = #{argm.to_s}"}.join ";"}
-        #{eval_str arr[2], "env"}
+        #{eval_str arr[2]}
         end
       }
     else
@@ -248,8 +248,9 @@ def evaluate token, env = new_env
     return
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){
+    env = env.new_stack
     #{arr[1].map{|argm| "env[:#{argm}] = #{argm.to_s}"}.join ";"}
-    #{eval_str arr[2], "env"}
+    #{eval_str arr[2]}
     }"
   when :if
     _if, cond, t_tokens, el_token = arr
@@ -277,8 +278,8 @@ def evaluate token, env = new_env
   else
     token = arr.first
     if token.respond_to? :call
-      env.instance_eval do
-        token.call *arr[1..-1].map{|elem| evaluate elem, env.new_stack}
+      env.new_stack.instance_exec do
+        env.instance_exec *arr[1..-1].map{|elem| evaluate elem, env.new_stack}, &token
       end
     else
       unless token.is_a?(Symbol) && (env.respond_to?(token, true) || env.local_variables?(token))
