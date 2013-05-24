@@ -10,8 +10,6 @@ describe "rblist" do
     run("#f").should == false
     run("nil").should == nil
 
-    run("'hello world'").should == "hello world"
-    run(%q{'"hello world"'}).should == "\"hello world\""
     run(%q{"'hello world'"}).should == "'hello world'"
     run("(+ 2 2)").should == 4
     run("(+ (* 2 100) (* 1 10))").should == 210
@@ -25,8 +23,17 @@ describe "rblist" do
     run("(list x 5 6 7)", e).should == [5,5,6,7]
     run("x", e).should == 5
 
-    run("(quote 'a')").should == 'a'
+    run("(quote ())").should == []
+    run('(quote "a")').should == "a"
     run("(quote a)").should == :a
+    run("(quote (1 2 3 4))").should == [1,2,3,4]
+    run("'()").should == []
+    run("'a").should == :a
+    run("'(1 2 3 4)").should == [1,2,3,4]
+    run("`()").should == []
+    run("`a").should == :a
+    run("`(1 2 3 4)").should == [1,2,3,4]
+
     run("(list 1 2 5 (+ 3 5))").should == [1,2,5,8]
     run("(cond ((atom 6) (+ 2 3)) ((atom (head (list (quote b) 5 9))) (+ 2 2)))").should == 4
     run("((lambda (x) (+ x x)) 5)").should == 10
