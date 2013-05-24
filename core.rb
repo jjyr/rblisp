@@ -292,9 +292,7 @@ def evaluate token, env = new_env
   else
     token = arr.first
     if token.respond_to? :call
-      env.new_stack.instance_exec do
-        env.instance_exec *arr[1..-1].map{|elem| evaluate elem, env.new_stack}, &token
-      end
+      env.instance_exec *arr[1..-1].map{|elem| evaluate elem, env.new_stack}, &token
     else
       arr[0] = evaluate arr.first, env.new_stack
       raise "no expression #{arr.first}" if !arr.first.is_a?(Array) && !arr.first.respond_to?(:call)
