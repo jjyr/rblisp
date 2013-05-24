@@ -6,6 +6,10 @@ require_relative 'core'
 
 describe "rblist" do
   it "shoud parse and run" do
+    run("#t").should == true
+    run("#f").should == false
+    run("nil").should == nil
+
     run("'hello world'").should == "hello world"
     run(%q{'"hello world"'}).should == "\"hello world\""
     run(%q{"'hello world'"}).should == "'hello world'"
