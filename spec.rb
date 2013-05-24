@@ -89,5 +89,9 @@ describe "rblist" do
     e = new_env
     run("(define abs (lambda (n) ((if (> n 0) + -) 0 n)))", e).should == nil
     run("(list (abs -3) (abs 0) (abs 3))", e).should == [3, 0, 3]
+
+    e = new_env
+    run("(define x 5)", e).should == nil
+    run("(+ (let ((x 3)) (+ x (* x 10))) x)", e).should == 38
   end
 end
