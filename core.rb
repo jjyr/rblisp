@@ -118,7 +118,7 @@ class Array
   alias _inspect inspect
   alias to_s _inspect
   def inspect
-    "(#{map(&:inspect).join ' '})"
+    "'(#{map(&:inspect).join ' '})"
   end
 
   def to_token
@@ -155,7 +155,10 @@ class Symbol
   def to_token
     ":#{self}"
   end
-  alias inspect to_s
+
+  def inspect
+    "'#{to_s}"
+  end
 end
 
 def parse_token str, vals = []
@@ -286,9 +289,6 @@ def evaluate token, env = new_env
     else 
       raise "parse error"
     end
-  when Array
-    arr[0] = evaluate arr.first, env.new_stack
-    evaluate arr, env.new_stack
   else
     token = arr.first
     if token.respond_to? :call
@@ -297,6 +297,7 @@ def evaluate token, env = new_env
       end
     else
       arr[0] = evaluate arr.first, env.new_stack
+      raise "no expression #{arr.first}" if !arr.first.is_a?(Array) && !arr.first.respond_to?(:call)
       evaluate arr, env.new_stack
     end
   end
