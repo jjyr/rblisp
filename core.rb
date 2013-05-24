@@ -178,7 +178,7 @@ def parse_token str, vals = []
         handle_str_limit[head]
         val << head
       else
-        vals << (val =~ /\A["'].+["']\z|\A[-+]?\d+\z/ ? eval(val) : val.to_sym) unless val.empty?
+        vals << (val =~ /\A["'].+["']\z|\A[-+]?\d+\z|nil|#t|#f/ ? get_literal(val) : val.to_sym) unless val.empty?
         val = ""
         return vals if head == ')'
       end
@@ -199,17 +199,24 @@ end
 
 def boolean? token
   case token
-  when true, :"#t", :true
+  when true, :"#t"
     true
-  when false, :"#f", :false
+  when false, :"#f"
     false
   else
     raise "#{token} is not boolean!"
   end
 end
 
-def is_literal? token, env = new_env
-  token.is_a?(String) || token.is_a?(Numeric) || token.is_a?(Symbol) && !env.respond_to?(token, true)
+def get_literal token
+  case token
+  when "#t"
+    true
+  when "#f"
+    false
+  else
+    eval(token)
+  end
 end
 
 def instruction_dump expr
@@ -231,7 +238,7 @@ def evaluate token, env = new_env
   when Numeric, String, TrueClass, FalseClass, NilClass
     return token
   when Symbol
-    return (if env.local_variables?(token) then env[token] elsif env.respond_to?(token, true) then env.method(token) else token end)
+    return (if env.local_variables?(token) then env[token] else env.method(token) end)
   end
   case arr.first
   when :define
@@ -246,6 +253,8 @@ def evaluate token, env = new_env
       env[arr[1]] = evaluate(arr[2], env)
     end
     return
+  when :quote
+    return arr[1]
   when :lambda
     return env.instance_eval "->(#{arr[1].join ","}){
     env = env.new_stack
@@ -272,7 +281,6 @@ def evaluate token, env = new_env
       raise "parse error"
     end
   when Array
-    arr.unshift :list if arr.size == 1 && arr.first.is_a?(Array)
     arr[0] = evaluate arr.first, env.new_stack
     evaluate arr, env.new_stack
   else
@@ -282,13 +290,8 @@ def evaluate token, env = new_env
         env.instance_exec *arr[1..-1].map{|elem| evaluate elem, env.new_stack}, &token
       end
     else
-      unless token.is_a?(Symbol) && (env.respond_to?(token, true) || env.local_variables?(token))
-        arr.unshift :list 
-        evaluate arr, env
-      else
-        arr[0] = evaluate arr.first, env.new_stack
-        evaluate arr, env.new_stack
-      end
+      arr[0] = evaluate arr.first, env.new_stack
+      evaluate arr, env.new_stack
     end
   end
 end
