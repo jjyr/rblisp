@@ -28,8 +28,13 @@ describe "rblist" do
     run("(quote 'a')").should == 'a'
     run("(quote a)").should == :a
     run("(list 1 2 5 (+ 3 5))").should == [1,2,5,8]
-    run("(cond ((atom 6) (+ 2 3)) ((atom (car (list (quote b) 5 9))) (+ 2 2)))").should == 4
+    run("(cond ((atom 6) (+ 2 3)) ((atom (head (list (quote b) 5 9))) (+ 2 2)))").should == 4
     run("((lambda (x) (+ x x)) 5)").should == 10
+
+    e = new_env
+    run("(define cs (cons 1 2))", e).should == nil
+    run("(car cs)", e).should == 1
+    run("(cdr cs)", e).should == 2
 
     e = new_env
     run("(define (f x) (+ x x))", e).should == nil
