@@ -15,23 +15,37 @@ describe "rblist" do
     run("x").should == :x
     run("exit").class.should == Method
     run("(puts nil)").should == nil
+
     e = new_env
     run("(define x 5)", e).should == nil
     run("(x 5 6 7)", e).should == [5,5,6,7]
     run("(x 5 6 7)", e).should == run("(list x 5 6 7)", e)
     run("x", e).should == 5
+
     run("(quote 'a')").should == 'a'
     run("(quote a)").should == :a
     run("(1 2 5 (+ 3 5))").should == [1,2,5,8]
     run("(cond ((atom 6) (+ 2 3)) ((atom (car (b 5 9))) (+ 2 2)))").should == 4
     run("((lambda (x) (+ x x)) 5)").should == 10
+
     e = new_env
     run("(define (f x) (+ x x))", e).should == nil
     run("(f 5)", e).should == 10
+
+    e = new_env
+    run("(define x 42)", e).should == nil
+    run("(define (f x) (+ x x))", e).should == nil
+    run("(f 5)", e).should == 10
+    run("x", e).should == 42
+    run("(define f2 (lambda (x) (+ x x)))", e).should == nil
+    run("(f2 5)", e).should == 10
+    run("x", e).should == 42
+
     e = new_env
     run("(define (f op) (op 2 4))", e).should == nil
     run("(f -)", e).should == -2
     run("(f *)", e).should == 8
+
     run("((lambda (x) (+ x x)) 5)").should == 10
     run("(and (atom x) false)").should == false
     run("(or (atom x) false)").should == true
@@ -40,17 +54,21 @@ describe "rblist" do
     run("(or false false true false true)").should == true
     run("(map (lambda (x) (* 2 x)) (2 5 4 6))").should == [4, 10, 8, 12]
     run("(string (map (lambda (x) (* 2 x)) (2 5 4 6)))").should == "410812"
+
     e = new_env
     run("(define twice (lambda (x) (* 2 x)))", e).should == nil
     run("(twice 5)", e).should == 10
+
     e = new_env
     run("(define fact (lambda (n) (cond ((<= n 1) 1) (true (* n (fact (- n 1)))))))", e).should == nil
     run("(fact 3)", e).should == 6
     run("(fact 50)", e).should == 30414093201713378043612608166064768844377641568960512000000000000
+
     e = new_env
     run("(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))", e).should == nil
     run("(fact 3)", e).should == 6
     run("(fact 50)", e).should == 30414093201713378043612608166064768844377641568960512000000000000
+
     e = new_env
     run("(define abs (lambda (n) ((if (> n 0) + -) 0 n)))", e).should == nil
     run("(list (abs -3) (abs 0) (abs 3))", e).should == [3, 0, 3]
