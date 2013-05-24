@@ -104,6 +104,12 @@ class Env
   def >= x1, x2
     !send(:<, x1, x2)
   end
+
+  alias display print
+
+  def newline
+    puts
+  end
 end
 
 def new_env_class
