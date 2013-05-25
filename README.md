@@ -7,6 +7,7 @@ lisp / scheme interpreter in ruby.
 1. implements in ruby, use many ruby tricks.
 2. all methods / evaluate / local\_variables delegate to ruby.
 3. easy to understand.
+4. just for study.
 
 ##Usage
 
@@ -29,7 +30,7 @@ or
 
 ##Support Methods
 lisp methods: 
->let, define, lambda, list, eq, map, quote ` or ' , + / * -, cond, if, and, or, not, size, head, tail, car, cdr, cons, display, newline, >, <, >=, <= etc...
+>let, define, lambda, list, eq, map, quote ` or ' , + / * -, cond, null?, if, and, or, not, size, head, tail, car, cdr, cons, display, newline, >, <, >=, <= etc...
 
 ruby Kernel methods:
 >puts, exit, etc...
