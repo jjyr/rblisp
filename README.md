@@ -13,8 +13,8 @@ lisp / scheme interpreter in ruby.
 `ruby rblisp.rb` to start cli
 
 ```lisp
-(hello world) 
-#=> (hello world)
+'(hello world) 
+#=> '('hello 'world)
 
 ((if (< (size "hello world") 42) puts 42) "hello world")
 #hello world
