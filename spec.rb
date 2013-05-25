@@ -6,6 +6,7 @@ require_relative 'core'
 
 describe "rblist" do
   it "shoud parse and run" do
+    expect { run "()" }.to raise_error
     run("#t").should == true
     run("#f").should == false
     run("nil").should == nil
