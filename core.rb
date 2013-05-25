@@ -37,6 +37,10 @@ class Env
     !boolean?(arg)
   end
 
+  def null? arg
+    arg.nil?
+  end
+
   def string *args
     args.join
   end
