@@ -10,6 +10,8 @@ describe "rblist" do
     run("#t").should == true
     run("#f").should == false
     run("nil").should == nil
+    run("(null? nil)").should == true
+    run("(null? '())").should == false
 
     run(%q{"'hello world'"}).should == "'hello world'"
     run("(+ 2 2)").should == 4
