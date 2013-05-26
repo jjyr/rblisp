@@ -272,6 +272,8 @@ def evaluate token, env = new_env
       env[arr[1]] = evaluate(arr[2], env)
     end
     return
+  when :set!
+    env.local_variables?(arr[1]) ? env[arr[1]] = evaluate(arr[2], env) : raise("undefined #{arr[1]}")
   when :quote
     return arr[1]
   when :lambda
