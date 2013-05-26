@@ -7,6 +7,13 @@ require_relative 'core'
 describe "rblist" do
   it "shoud parse and run" do
     expect { run "()" }.to raise_error
+
+    expect { run "(set! x 5)" }.to raise_error
+    e = new_env
+    run("(define x 5)", e).should == nil
+    run("(set! x 7)", e).should == 7
+    run("x", e).should == 7
+
     run("#t").should == true
     run("#f").should == false
     run("nil").should == nil
