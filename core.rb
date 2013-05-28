@@ -1,3 +1,5 @@
+require 'continuation'
+
 class Env
   def initialize sup = nil
     @local_variables = sup ? sup.instance_variable_get("@local_variables").dup : {}
@@ -114,6 +116,14 @@ class Env
   def newline
     puts
   end
+
+  define_method :"call/cc" do |lmd|
+    callcc do |cc|
+      lmd.call cc
+    end
+  end
+
+  alias_method :"call-with-current-continuation", :"call/cc"
 end
 
 def new_env_class
@@ -307,7 +317,9 @@ def evaluate token, env = new_env
   else
     token = arr.first
     if token.respond_to? :call
-      env.instance_exec *arr[1..-1].map{|elem| evaluate elem, env.new_stack}, &token
+      env.instance_eval do
+        token.call *arr[1..-1].map{|elem| evaluate elem, env.new_stack}
+      end
     else
       arr[0] = evaluate arr.first, env.new_stack
       raise "no expression #{arr.first}" if !arr.first.is_a?(Array) && !arr.first.respond_to?(:call)
