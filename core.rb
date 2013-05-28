@@ -290,7 +290,7 @@ def evaluate token, env = new_env
     return env.instance_eval "->(#{arr[1].join ","}){
     env = env.new_stack
     #{arr[1].map{|argm| "env[:#{argm}] = #{argm.to_s}"}.join ";"}
-    #{eval_str arr[2]}
+    #{arr[2..-1].map{|str| eval_str str}.join ";"}
     }"
   when :let, :"let*"
     let, var_exprs, expr = arr

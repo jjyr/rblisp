@@ -6,6 +6,7 @@ require_relative 'core'
 
 describe "rblist" do
   it "shoud parse and run" do
+    run("((lambda (x) (* 2 x) 5) 2)").should == 5
     expect { run "()" }.to raise_error
 
     expect { run "(set! x 5)" }.to raise_error
@@ -47,6 +48,7 @@ describe "rblist" do
     run("(list 1 2 5 (+ 3 5))").should == [1,2,5,8]
     run("(cond ((atom 6) (+ 2 3)) ((atom (head (list (quote b) 5 9))) (+ 2 2)))").should == 4
     run("((lambda (x) (+ x x)) 5)").should == 10
+    run("((lambda (x) (* 2 x) 5) 2)").should == 5
 
     e = new_env
     run("(define cs (cons 1 2))", e).should == nil
