@@ -105,5 +105,8 @@ describe "rblist" do
     e = new_env
     run("(define x 5)", e).should == nil
     run("(+ (let ((x 3)) (+ x (* x 10))) x)", e).should == 38
+
+    run("(call/cc (lambda (c) (c 3)))").should == 3
+    run("(call-with-current-continuation (lambda (c) (c 3)))").should == 3
   end
 end
