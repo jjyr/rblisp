@@ -51,7 +51,9 @@ describe "rblist" do
     e = new_env
     run("(define cs (cons 1 2))", e).should == nil
     run("(car cs)", e).should == 1
-    run("(cdr cs)", e).should == 2
+    run("(cdr cs)", e).should == [2]
+    run("(size (cons cs 3))", e).should == 2
+    run("(size (cons 3 cs))", e).should == 3
 
     e = new_env
     run("(define (f x) (+ x x))", e).should == nil
