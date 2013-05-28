@@ -292,7 +292,7 @@ def evaluate token, env = new_env
     #{arr[1].map{|argm| "env[:#{argm}] = #{argm.to_s}"}.join ";"}
     #{eval_str arr[2]}
     }"
-  when :let
+  when :let, :"let*"
     let, var_exprs, expr = arr
     evaluate [[:lambda, var_exprs.map(&:first), expr], * var_exprs.map(&:last)], env
   when :if
