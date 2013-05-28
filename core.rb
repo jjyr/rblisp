@@ -77,16 +77,16 @@ class Env
     x[1..-1]
   end
 
-  def cons f, s
-    {f: f, s: s}
+  def cons h, t
+    [h, *t]
   end
 
-  def car item
-    item[:f]
+  def car list
+    list.first
   end
 
-  def cdr item
-    item[:s]
+  def cdr list
+    list[1..-1]
   end
 
   def new_stack
